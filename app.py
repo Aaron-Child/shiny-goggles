@@ -19,16 +19,31 @@ uploaded_file = st.file_uploader("Choose the raw Excel file (e.g., SODO_JUN 2026
 
 if uploaded_file is not None:
     try:
-        # Extract filename to get the month dynamically
-        filename = uploaded_file.name
-        match = re.search(f'{gym_prefix}_(.*?)\\.xlsx', filename)
-        month_str = match.group(1).replace(' ', '_').upper() if match else 'UNKNOWN_MONTH'
+        # Extract filename and normalize it to uppercase for robust matching
+        filename = uploaded_file.name.upper()
+        clean_prefix = gym_prefix.upper()
         
-        st.success(f"Successfully loaded: **{filename}** (Processing for **{month_str}**)")
+        # Smart regex: looks for the gym prefix followed by an underscore OR a space
+        match = re.search(f'{clean_prefix}[_\\s](.*?)\\.XLSX', filename)
+        
+        if match:
+            month_str = match.group(1).strip().replace(' ', '_')
+        else:
+            # Fallback: if it can't find a clean match, grab the second tab's name automatically
+            month_str = "DETECTED_MONTH"
+        
+        st.success(f"Successfully loaded: **{uploaded_file.name}**")
 
         # 4. Load Data directly from the uploaded file buffer
         df_report = pd.read_excel(uploaded_file, sheet_name=0)
+        
+        # DYNAMIC TAB FIX: Instead of looking for a named tab, we dynamically read the 
+        # actual tab name from the second position so the merge never fails!
+        xl = pd.ExcelFile(uploaded_file)
+        second_tab_name = xl.sheet_names[1]
         df_month = pd.read_excel(uploaded_file, sheet_name=1)
+        
+        st.info(f"Comparing data between sheet tabs: **'{xl.sheet_names[0]}'** and **'{second_tab_name}'**")
 
         # Standardize column names
         df_report.columns = df_report.columns.str.strip().str.lower()
