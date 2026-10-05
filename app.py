@@ -11,7 +11,7 @@ st.write("Upload the raw Excel spreadsheet below to automatically generate your 
 # 2. Sidebar Configuration for Gym Selection
 gym_prefix = st.sidebar.selectbox(
     "Select Gym Location",
-    ["LHI", "SDY", "FTU", "MCK", "TSQ", "KTY", "SST", "MMC", "SODO"]
+    ["LHI", "SDY", "FTU", "MCK", "TSQ", "KTY", "SST", "MMC", "SODO", "MCA"]
 )
 
 # 3. File Uploader Component
